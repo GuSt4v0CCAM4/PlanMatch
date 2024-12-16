@@ -4,11 +4,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plan_match/view/Backpack_Screen.dart';
+import 'package:plan_match/view/Chat_Screen.dart';
 import 'package:plan_match/view/Map_Screen.dart';
 import '../const.dart';
 import 'Visit_Screen.dart';
 import 'dart:math';
 import 'package:flutter/services.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -77,11 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     innerBorderColor: Colors.white,
                   ),
                   TappableIconData(
-                    assetPath: 'assets/images/restaurant.svg',
+                    assetPath: 'images/chat.svg',
                     color: Colors.orange.shade700,
                     tappedColor: Colors.grey,
                     onTap: () {
-                      /// Add navigation call based on your navigation setup.
+                      Get.off(const ChatScreen());
                     },
                     outerBorderColor: Colors.white,
                     outerBorderSize: 10,
@@ -299,68 +301,89 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: ImagesList.length,
-                    itemBuilder: ((context, index) => Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => VistiScreen()));
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                margin: const EdgeInsets.all(10),
-                                height: 200,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  image: DecorationImage(
-                                    image: AssetImage(ImagesList[index]),
-                                    fit: BoxFit.fill,
-                                  ),
+                height: 350, // Altura ajustada para las tarjetas
+                child: CardSwiper(
+                  cardsCount: ImagesList.length,
+                  cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+                    return Container(
+                      margin: const EdgeInsets.all(10), // Espacio alrededor del contenedor
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Fondo blanco para todo el contenedor
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => VistiScreen()),
+                              );
+                            },
+                            child: Container(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
+                                ),
+                                image: DecorationImage(
+                                  image: AssetImage(ImagesList[index]),
+                                  fit: BoxFit.fill,
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 20, right: 20, top: 10),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    CityList[index],
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w700),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      // Llama a tu función aquí
-                                      CircularMenu(context);
-                                    },
-                                    child: const Icon(Icons.menu_rounded),
-                                  )
-                                ],
-                              ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10), // Espaciado interno para la descripción
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      CityList[index],
+                                      style: const TextStyle(fontWeight: FontWeight.w700),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        // Llama a tu función aquí
+                                        CircularMenu(context);
+                                      },
+                                      child: const Icon(Icons.menu_rounded),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: const [
+                                    Icon(
+                                      Icons.star,
+                                      color: Colors.deepOrangeAccent,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text('4.5'),
+                                  ],
+                                ),
+                              ],
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 20, right: 20),
-                              child: Row(
-                                children: const [
-                                  Icon(
-                                    Icons.star,
-                                    color: Colors.deepOrangeAccent,
-                                  ),
-                                  Text('4.5')
-                                ],
-                              ),
-                            )
-                          ],
-                        ))),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               )
+
+
             ],
           ),
         ),
