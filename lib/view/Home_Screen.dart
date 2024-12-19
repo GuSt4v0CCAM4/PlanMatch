@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:plan_match/view/Backpack_Screen.dart';
 import 'package:plan_match/view/Chat_Screen.dart';
 import 'package:plan_match/view/Map_Screen.dart';
+import 'package:plan_match/view/Quizz_Screen.dart';
+import 'package:plan_match/view/Roulette_Screen.dart';
 import '../const.dart';
 import 'Visit_Screen.dart';
 import 'dart:math';
@@ -34,8 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return CircleNavigatorConfig(
               config: Config(
                 center: Point(200, 300),
-                animatedRippleColor: const Color(0xFF66A0FE).withOpacity(0.7),
-                filledCircleColor: const Color(0xFFB4D8FF).withOpacity(0.7),
+                animatedRippleColor: const Color(0xFFA9E190).withOpacity(0.7),
+                filledCircleColor: const Color(0xFFDBF4AD).withOpacity(0.7),
                 isOpeningAnimation: _isOpeningAnimation,
                 onOpenAnimationComplete: () {
                   setState(() {
@@ -90,22 +92,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     innerBorderColor: Colors.white,
                   ),
                   TappableIconData(
-                    assetPath: 'assets/images/baby_changing_station.svg',
+                    assetPath: 'images/social.svg',
                     color: Colors.red.shade700,
                     tappedColor: Colors.grey,
                     onTap: () {
-                      /// Add navigation call based on your navigation setup.
+                      Get.off(const QuizzScreen());
                     },
                     outerBorderColor: Colors.white,
                     outerBorderSize: 10,
                     innerBorderColor: Colors.white,
                   ),
                   TappableIconData(
-                    assetPath: 'assets/images/construction.svg',
+                    assetPath: 'images/ruleta.svg',
                     color: Colors.yellow.shade800,
                     tappedColor: Colors.grey,
                     onTap: () {
-                      /// Add navigation call based on your navigation setup.
+                      Get.off(const RouletteScreen());
                     },
                     outerBorderColor: Colors.white,
                     outerBorderSize: 10,
@@ -113,9 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
                 closeIcon: TappableIconData(
-                  color: const Color(0xFF3678D0),
+                  color: const Color(0xFF767522),
                   assetPath: 'assets/images/close.svg',
-                  tappedColor: const Color(0xFF3678D0).withOpacity(0.5),
+                  tappedColor: const Color(0xFF767522).withOpacity(0.5),
                   onTap: () {
                     setState(() {
                       _isClosingAnimation = true;
