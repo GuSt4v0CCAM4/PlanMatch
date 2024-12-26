@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:plan_match/view/menu/FavoritesSi_Screen.dart';
 import '../const.dart';
 import 'Home_Screen.dart';
 
@@ -225,13 +226,25 @@ class _VistiScreenState extends State<VistiScreen> {
                                               ), // Shadow position
                                             ),
                                           ]),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Get.off(FavoritesSiScreen(
+                                          title: "Caminata Grupal",
+                                          image: "images/caminata-grupal.jpg",
+                                        ),);
+                                      },
                                       child: const Center(
-                                          child: Text(
-                                        "Observalo",
-                                        style: TextStyle(
+                                        child: Text(
+                                          "Apúntate",
+                                          style: TextStyle(
                                             color: Colors.white,
-                                            fontWeight: FontWeight.w700),
-                                      ))),
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                  ),
                                 ],
                               ),
                             ),

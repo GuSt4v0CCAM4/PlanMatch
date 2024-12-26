@@ -58,57 +58,59 @@ class _MapScreenState extends State<MapScreen> {
     final position = await Geolocator.getCurrentPosition();
     setState(() {
       _currentLocation = LatLng(position.latitude, position.longitude);
-      _generateNearbyEvents(); // Generar puntos cercanos
+      _generateEvent(); // Generar un punto aleatorio cercano
     });
   }
 
-  // Método para generar eventos cercanos
-  void _generateNearbyEvents() {
-    const int numberOfEvents = 5; // Número de eventos a generar
-    const double maxDistanceInMeters = 5000; // Distancia máxima para los eventos (5 km)
+  // Método para generar un evento cercano
+  void _generateEvent() {
+    const double maxDistanceInMeters = 2000; // Distancia máxima para el evento (2 km)
     final random = Random();
 
-    for (int i = 0; i < numberOfEvents; i++) {
-      final double randomDistance = random.nextDouble() * maxDistanceInMeters;
-      final double randomAngle = random.nextDouble() * 2 * pi;
+    final double randomDistance = random.nextDouble() * maxDistanceInMeters;
+    final double randomAngle = random.nextDouble() * 2 * pi;
 
-      // Calcular desplazamientos en latitud y longitud
-      final double offsetLatitude = randomDistance * cos(randomAngle) / 111320; // 1 grado ≈ 111.32 km
-      final double offsetLongitude = randomDistance * sin(randomAngle) /
-          (111320 * cos(_currentLocation!.latitude * pi / 180));
+    // Calcular desplazamientos en latitud y longitud
+    final double offsetLatitude = randomDistance * cos(randomAngle) / 111320; // 1 grado ≈ 111.32 km
+    final double offsetLongitude = randomDistance * sin(randomAngle) /
+        (111320 * cos(_currentLocation!.latitude * pi / 180));
 
-      final LatLng eventPosition = LatLng(
-        _currentLocation!.latitude + offsetLatitude,
-        _currentLocation!.longitude + offsetLongitude,
-      );
+    final LatLng eventPosition = LatLng(
+      _currentLocation!.latitude + offsetLatitude,
+      _currentLocation!.longitude + offsetLongitude,
+    );
 
-      final double distance = Geolocator.distanceBetween(
-        _currentLocation!.latitude,
-        _currentLocation!.longitude,
-        eventPosition.latitude,
-        eventPosition.longitude,
-      );
+    final double distance = Geolocator.distanceBetween(
+      _currentLocation!.latitude,
+      _currentLocation!.longitude,
+      eventPosition.latitude,
+      eventPosition.longitude,
+    );
 
-      // Crear marcador para el evento
-      _markers.add(
-        Marker(
-          markerId: MarkerId("event_$i"),
-          position: eventPosition,
-          infoWindow: InfoWindow(
-            title: "Evento $i",
-            snippet: "Distancia: ${distance.toStringAsFixed(2)} metros",
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+    // Calcular el tiempo estimado (asumiendo 5 km/h de velocidad promedio)
+    final double timeInHours = distance / 5000; // Tiempo en horas
+    final int minutes = (timeInHours * 60).round();
+
+    // Crear marcador para el evento
+    _markers.add(
+      Marker(
+        markerId: const MarkerId("paseoGrupal"),
+        position: eventPosition,
+        infoWindow: InfoWindow(
+          title: "Paseo Grupal",
+          snippet: "Distancia: ${distance.toStringAsFixed(2)} metros\n"
+              "Tiempo estimado: ${minutes} minutos caminando",
         ),
-      );
-    }
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      ),
+    );
 
     // Agregar marcador para la ubicación actual
     _markers.add(
       Marker(
         markerId: const MarkerId("currentLocation"),
         position: _currentLocation!,
-        infoWindow: const InfoWindow(title: "Tu ubicación"),
+        infoWindow: const InfoWindow(title: "Ubicacion de la actividad"),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       ),
     );
@@ -130,7 +132,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Eventos Cercanos'),
+        title: const Text('Paseo Grupal'),
         backgroundColor: Colors.green[700],
       ),
       body: _currentLocation == null

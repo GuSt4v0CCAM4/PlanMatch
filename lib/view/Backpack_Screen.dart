@@ -14,7 +14,9 @@ class _BackpackScreen extends State<BackpackScreen> {
   late CameraController _controller;
   late ObjectDetector _objectDetector;
   bool _isDetecting = false;
-  List<DetectedObject> _detectedObjects = [];
+
+  // Lista para almacenar los objetos detectados y su estado (marcado o no)
+  List<Map<String, dynamic>> _detectedObjectsWithState = [];
 
   @override
   void initState() {
@@ -23,11 +25,12 @@ class _BackpackScreen extends State<BackpackScreen> {
     _initializeObjectDetector();
   }
 
-  // Inicialización de la cámara
   void _initializeCamera() async {
     final cameraList = await availableCameras();
     _controller = CameraController(cameraList.first, ResolutionPreset.medium,
-        enableAudio: false, imageFormatGroup: Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888);
+        enableAudio: false,
+        imageFormatGroup:
+        Platform.isAndroid ? ImageFormatGroup.nv21 : ImageFormatGroup.bgra8888);
     _controller.initialize().then((_) {
       if (!mounted) return;
       setState(() {});
@@ -35,7 +38,6 @@ class _BackpackScreen extends State<BackpackScreen> {
     });
   }
 
-  // Inicialización del detector de objetos
   void _initializeObjectDetector() {
     final options = ObjectDetectorOptions(
       mode: DetectionMode.stream,
@@ -45,20 +47,30 @@ class _BackpackScreen extends State<BackpackScreen> {
     _objectDetector = ObjectDetector(options: options);
   }
 
-  // Procesar las imágenes de la cámara para detectar objetos
   void _processCameraImage(CameraImage image) async {
     if (_isDetecting) return;
     _isDetecting = true;
 
     final inputImage = _convertToInputImage(image);
-    final objects = await _objectDetector.processImage(inputImage);
+    final detectedObjects = await _objectDetector.processImage(inputImage);
+
     setState(() {
-      _detectedObjects = objects;
+      _updateDetectedObjects(detectedObjects);
     });
     _isDetecting = false;
   }
 
-  // Convertir la imagen de la cámara a un formato adecuado para la detección
+  void _updateDetectedObjects(List<DetectedObject> detectedObjects) {
+    _detectedObjectsWithState = detectedObjects.map((object) {
+      final label = object.labels.isNotEmpty ? object.labels.first.text : 'No name';
+      return {
+        'label': label,
+        'checked': false,
+        'boundingBox': object.boundingBox,
+      };
+    }).toList();
+  }
+
   InputImage _convertToInputImage(CameraImage image) {
     var sensorOrientation = _controller.description.sensorOrientation;
     InputImageRotation? rotation;
@@ -86,7 +98,6 @@ class _BackpackScreen extends State<BackpackScreen> {
     );
   }
 
-  // Liberar los recursos cuando la pantalla se descarte
   @override
   void dispose() {
     _controller.dispose();
@@ -104,27 +115,54 @@ class _BackpackScreen extends State<BackpackScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Backpack Screen')),
+      appBar: AppBar(title: const Text('Apunta las cosas que llevarás')),
       body: Stack(
         children: [
           CameraPreview(_controller),
           _buildBoundingBoxes(),
+          _buildObjectChecklist(),
         ],
       ),
     );
   }
 
-  // Dibujar los cuadros delimitadores y etiquetas de los objetos detectados
   Widget _buildBoundingBoxes() {
     return CustomPaint(
-      painter: BoxPainter(objects: _detectedObjects),
+      painter: BoxPainter(objects: _detectedObjectsWithState),
+    );
+  }
+
+  Widget _buildObjectChecklist() {
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        color: Colors.white,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: _detectedObjectsWithState.length,
+          itemBuilder: (context, index) {
+            final object = _detectedObjectsWithState[index];
+            return CheckboxListTile(
+              title: Text(object['label']),
+              value: object['checked'],
+              onChanged: (value) {
+                setState(() {
+                  _detectedObjectsWithState[index]['checked'] = value ?? false;
+                });
+              },
+            );
+          },
+        ),
+      ),
     );
   }
 }
 
-// Clase para pintar los cuadros delimitadores y las etiquetas
 class BoxPainter extends CustomPainter {
-  final List<DetectedObject> objects;
+  final List<Map<String, dynamic>> objects;
+
   BoxPainter({required this.objects});
 
   @override
@@ -134,7 +172,7 @@ class BoxPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     for (var object in objects) {
-      final rect = object.boundingBox;
+      final rect = object['boundingBox'];
       canvas.drawRect(
         Rect.fromLTRB(
           rect.left,
@@ -144,16 +182,17 @@ class BoxPainter extends CustomPainter {
         ),
         paint,
       );
-      TextStyle textStyle = const TextStyle(
+      final text = object['label'];
+      final textStyle = const TextStyle(
         color: Colors.purpleAccent,
         fontSize: 16,
         fontWeight: FontWeight.bold,
       );
-      TextSpan textSpan = TextSpan(
-        text: object.labels.isEmpty ? 'No name' : object.labels.first.text,
+      final textSpan = TextSpan(
+        text: text,
         style: textStyle,
       );
-      TextPainter textPainter = TextPainter(
+      final textPainter = TextPainter(
         text: textSpan,
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.center,
@@ -161,7 +200,7 @@ class BoxPainter extends CustomPainter {
       textPainter.layout();
       double dx = rect.left + (rect.width - textPainter.width) / 2;
       double dy = rect.top + (rect.height - textPainter.height) / 2;
-      Offset offset = Offset(dx, dy);
+      final offset = Offset(dx, dy);
       textPainter.paint(canvas, offset);
     }
   }

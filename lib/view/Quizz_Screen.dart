@@ -24,8 +24,6 @@ class _QuizzScreenState extends State<QuizzScreen> {
     final List<String> videoPaths = [
       'videos/video1.mp4',
       'videos/video2.mp4',
-      'videos/video3.mp4',
-      'videos/video4.mp4',
     ];
 
     // Inicializa los controladores de video desde las rutas locales
@@ -52,7 +50,7 @@ class _QuizzScreenState extends State<QuizzScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Conectate'),
+        title: const Text('Conoce mas sobre la actividad'),
       ),
       body: TikTokStyleFullPageScroller(
         contentSize: videoControllers.length,
